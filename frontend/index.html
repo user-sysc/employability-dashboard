@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Analizador Dinamico de Empleabilidad Nacional</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🗺️</text></svg>">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div id="app">
+<header>
+  <h1>Analizador Dinamico de Empleabilidad Nacional</h1>
+  <p class="subtitle">GEIH 2007-2026 | Modelos y Simulacion</p>
+</header>
+
+<nav class="filters">
+  <div class="filter-group">
+    <label>Año</label>
+    <select id="filter-anio"></select>
+  </div>
+  <div class="filter-group">
+    <label>Departamento</label>
+    <select id="filter-depto"><option value="todos">Todos</option></select>
+  </div>
+
+  <div class="filter-group">
+    <label>Sexo</label>
+    <select id="filter-sexo">
+      <option value="total">Total</option>
+      <option value="hombres">Hombres</option>
+      <option value="mujeres">Mujeres</option>
+    </select>
+  </div>
+  <div class="filter-group">
+    <label>Indicador</label>
+    <div class="concepto-row">
+      <select id="filter-concepto"></select>
+      <span id="concepto-desc" class="concepto-desc"></span>
+    </div>
+  </div>
+</nav>
+
+<div class="kpi-row" id="kpi-container">
+  <div class="kpi-card kpi-card-nacional" id="kpi-nacional-card">
+    <span class="kpi-label" id="kpi-nacional-label">Desempleo Nacional</span>
+    <span class="kpi-value kpi-value-nacional" id="kpi-nacional">-</span>
+  </div>
+  <div class="kpi-card"><span class="kpi-label">Media</span><span class="kpi-value" id="kpi-media">-</span></div>
+  <div class="kpi-card"><span class="kpi-label">Mediana</span><span class="kpi-value" id="kpi-mediana">-</span></div>
+  <div class="kpi-card"><span class="kpi-label">Moda (Estadistica)</span><span class="kpi-value" id="kpi-moda">-</span></div>
+  <div class="kpi-card"><span class="kpi-label">Desv. Estandar</span><span class="kpi-value" id="kpi-desviacion">-</span></div>
+  <div class="kpi-card"><span class="kpi-label">Minimo</span><span class="kpi-value" id="kpi-minimo">-</span></div>
+  <div class="kpi-card"><span class="kpi-label">Maximo</span><span class="kpi-value" id="kpi-maximo">-</span></div>
+</div>
+
+<div class="main-grid">
+  <div class="panel panel-map">
+    <h2>Mapa Interactivo de Colombia</h2>
+    <div id="map"></div>
+  </div>
+  <div class="panel panel-chart">
+    <h2>Comparativa por Departamento</h2>
+    <canvas id="chart-bar"></canvas>
+  </div>
+</div>
+
+<div class="panel panel-trend">
+  <h2>Tendencia Temporal</h2>
+  <canvas id="chart-line"></canvas>
+</div>
+
+<div style="display: grid; grid-template-columns: 2fr 1fr; gap: 16px; margin-bottom: 16px;">
+  <div class="panel panel-dist">
+    <h2>Distribucion Normal (Campana de Gauss)</h2>
+    <canvas id="chart-dist"></canvas>
+  </div>
+  <div class="panel panel-pie">
+    <h2>Distribucion por Sexo</h2>
+    <canvas id="chart-pie"></canvas>
+  </div>
+</div>
+
+<div class="panels-bottom">
+  <div class="panel panel-interp">
+    <h2>Interpretacion de Resultados</h2>
+    <div id="interpretacion"></div>
+  </div>
+  <div class="panel panel-correlacion">
+    <h2>Correlacion: TD Media vs Volatilidad</h2>
+    <div id="correlacion-content"></div>
+    <canvas id="chart-correlacion"></canvas>
+  </div>
+</div>
+
+<div id="kpi-tooltip" class="kpi-tooltip"></div>
+
+<footer>
+  <p>Fuente: DANE - GEIH 2007-2025 | Proyeccion 2026</p>
+  <p>Proyecto de Modelos y Simulacion - Analizador Dinamico de Empleabilidad Nacional</p>
+</footer>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
+<script src="js/colombia-geo.js"></script>
+<script src="js/map.js"></script>
+<script src="js/chart.js"></script>
+<script src="js/stats.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

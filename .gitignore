@@ -1,0 +1,63 @@
+# Entornos virtuales y dependencias
+venv/
+env/
+ENV/
+.venv
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+pip-log.txt
+pip-delete-this-directory.txt
+.eggs/
+*.egg-info/
+dist/
+build/
+
+# Cache de Python
+.pytest_cache/
+.coverage
+htmlcov/
+
+# IDE y editores
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+*.sublime-project
+*.sublime-workspace
+
+# Variables de entorno
+.env
+.env.local
+.env.*.local
+
+# Archivos del sistema
+Thumbs.db
+.thumbsdb
+
+# Datos sensibles (opcional, según tu caso)
+# data/  <- Descomenta si no quieres subir la carpeta data
+
+# Node modules (si usas npm/yarn en frontend)
+node_modules/
+package-lock.json
+yarn.lock
+
+# Build y archivos compilados
+*.o
+*.a
+*.dylib
+*.dll
+*.exe
+
+# Logs
+logs/
+*.log
+*.logs
+
+# MANTENER: Excel
+# anex-GEIHDepartamentos-2025.xlsx SÍ SE SUBE ✓
