@@ -77,7 +77,7 @@ function createLineChart(ctx, labels, datasets, concepto) {
   });
 }
 
-function createDistChart(ctx, labels, observed, expected, curvaX, curvaY, media, std, concepto) {
+function createDistChart(ctx, labels, observed, expected, curvaX, curvaY, media, std, concepto, tipo) {
   if (chartDist) chartDist.destroy();
   
   const unidad = isTasaChart(concepto) ? '%' : '';
@@ -157,7 +157,7 @@ function createDistChart(ctx, labels, observed, expected, curvaX, curvaY, media,
         legend: { position: 'top', labels: { font: { size: 10 } } },
         title: {
           display: true,
-          text: `Media: ${media.toFixed(2)} | Desv.Est: ${std.toFixed(2)}`,
+          text: `Media: ${media.toFixed(2)} | Desv.Est: ${std.toFixed(2)} | Ajuste: normal`,
           font: { size: 11 }
         }
       },

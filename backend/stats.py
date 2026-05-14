@@ -7,6 +7,33 @@ import os
 
 DATA_PATH = os.path.join(os.path.dirname(__file__), '..', 'data', 'empleabilidad_full.csv')
 
+CONCEPTOS_PORCENTAJE = [
+    'Tasa de Desocupacion (TD)',
+    'Tasa de Ocupacion (TO)',
+    'Tasa Global de Participacion (TGP)',
+    'Tasa de Subocupacion (TS)',
+    'Porcentaje poblacion en edad de trabajar',
+]
+
+
+def es_porcentaje(concepto):
+    return concepto in CONCEPTOS_PORCENTAJE
+
+
+def validar_valor(valor, concepto):
+    if pd.isna(valor):
+        return False
+    if es_porcentaje(concepto):
+        return 0 <= valor <= 100
+    return valor >= 0
+
+
+def filtrar_serie(series, concepto):
+    values = series.dropna()
+    if not concepto or not es_porcentaje(concepto):
+        return values[values >= 0]
+    return values[(values >= 0) & (values <= 100)]
+
 
 def load_data():
     return pd.read_csv(DATA_PATH)
@@ -33,8 +60,8 @@ def _to_native(obj):
     return obj
 
 
-def calcular_estadisticos(series):
-    values = series.dropna().values
+def calcular_estadisticos(series, concepto=''):
+    values = filtrar_serie(series, concepto).values
     if len(values) == 0:
         return {}
     mean = float(np.mean(values))
@@ -73,7 +100,7 @@ def detectar_outliers(series):
     return results
 
 
-def distribucion_normal(series, bins=10):
+def distribucion_normal(series, bins=10, concepto=''):
     values = series.dropna().values
     if len(values) < 3:
         return {'labels': [], 'observado': [], 'esperado': []}
@@ -81,16 +108,20 @@ def distribucion_normal(series, bins=10):
     std = float(np.std(values, ddof=1))
     hist, edges = np.histogram(values, bins=bins)
     labels = [round(float((edges[i] + edges[i+1]) / 2), 2) for i in range(len(hist))]
+    bin_width = edges[1] - edges[0] if len(edges) > 1 else 1
     x = np.linspace(mean - 3*std, mean + 3*std, 100)
     y = sp_stats.norm.pdf(x, mean, std)
+    tipo = 'normal'
+
     return _to_native({
         'labels': labels,
         'observado': hist.tolist(),
-        'esperado': (y * len(values) * (edges[1] - edges[0])).tolist(),
+        'esperado': (y * len(values) * bin_width).tolist(),
         'curva_x': x.tolist(),
         'curva_y': y.tolist(),
         'media': mean,
         'std': std,
+        'tipo': tipo,
     })
 
 
@@ -117,28 +148,61 @@ def interpretar(series, nombre='', labels=None):
      below = int(sum(1 for v in values if v < mean))
 
      if nombre == 'Tasa de Desocupacion (TD)':
-         if mean < 8:
-             nivel = 'bajo'
-             resumen = f'El promedio es {mean:.1f}% — nivel BAJO de desempleo.'
-         elif mean < 12:
-             nivel = 'moderado'
-             resumen = f'El promedio es {mean:.1f}% — nivel MODERADO de desempleo.'
-         else:
-             nivel = 'alto'
-             resumen = f'El promedio es {mean:.1f}% — nivel ALTO de desempleo.'
+          if mean < 8:
+               nivel = 'bajo'
+               resumen = f'El promedio es {mean:.1f}% — nivel BAJO de desempleo.'
+          elif mean < 12:
+               nivel = 'moderado'
+               resumen = f'El promedio es {mean:.1f}% — nivel MODERADO de desempleo.'
+          else:
+               nivel = 'alto'
+               resumen = f'El promedio es {mean:.1f}% — nivel ALTO de desempleo.'
      elif nombre == 'Tasa de Ocupacion (TO)':
-         if mean > 58:
-             nivel = 'alto'
-             resumen = f'El promedio es {mean:.1f}% — nivel ALTO de ocupacion (señal positiva).'
-         elif mean > 52:
-             nivel = 'moderado'
-             resumen = f'El promedio es {mean:.1f}% — nivel MODERADO de ocupacion.'
-         else:
-             nivel = 'bajo'
-             resumen = f'El promedio es {mean:.1f}% — nivel BAJO de ocupacion.'
+          if mean > 58:
+               nivel = 'alto'
+               resumen = f'El promedio es {mean:.1f}% — nivel ALTO de ocupacion (señal positiva).'
+          elif mean > 52:
+               nivel = 'moderado'
+               resumen = f'El promedio es {mean:.1f}% — nivel MODERADO de ocupacion.'
+          else:
+               nivel = 'bajo'
+               resumen = f'El promedio es {mean:.1f}% — nivel BAJO de ocupacion.'
+     elif nombre == 'Tasa Global de Participacion (TGP)':
+          if mean > 70:
+               nivel = 'alto'
+               resumen = f'El promedio es {mean:.1f}% — nivel ALTO de participacion laboral.'
+          elif mean > 55:
+               nivel = 'moderado'
+               resumen = f'El promedio es {mean:.1f}% — nivel MODERADO de participacion laboral.'
+          else:
+               nivel = 'bajo'
+               resumen = f'El promedio es {mean:.1f}% — nivel BAJO de participacion laboral.'
+     elif nombre == 'Tasa de Subocupacion (TS)':
+          if mean < 8:
+               nivel = 'bajo'
+               resumen = f'El promedio es {mean:.1f}% — nivel BAJO de subocupacion.'
+          elif mean < 15:
+               nivel = 'moderado'
+               resumen = f'El promedio es {mean:.1f}% — nivel MODERADO de subocupacion.'
+          else:
+               nivel = 'alto'
+               resumen = f'El promedio es {mean:.1f}% — nivel ALTO de subocupacion.'
+     elif nombre == 'Porcentaje poblacion en edad de trabajar':
+          if mean > 80:
+               nivel = 'alto'
+               resumen = f'El promedio es {mean:.1f}% — proporcion ALTA de poblacion en edad de trabajar.'
+          elif mean > 70:
+               nivel = 'moderado'
+               resumen = f'El promedio es {mean:.1f}% — proporcion MODERADA de poblacion en edad de trabajar.'
+          else:
+               nivel = 'bajo'
+               resumen = f'El promedio es {mean:.1f}% — proporcion BAJA de poblacion en edad de trabajar.'
+     elif es_porcentaje(nombre):
+          nivel = 'moderado'
+          resumen = f'El promedio es {mean:.1f}% con desviacion de {std:.2f}.'
      else:
-         nivel = 'moderado'
-         resumen = f'El promedio es {mean:.1f}% con desviacion de {std:.2f}.'
+          nivel = 'moderado'
+          resumen = f'El promedio es {mean:,.1f} (en miles) con desviacion de {std:,.2f}.'
 
      # Calcular top 3 deptos más altos y más bajos
      top_deptos = {'mas_altos': [], 'mas_bajos': []}

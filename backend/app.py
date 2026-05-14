@@ -2,6 +2,7 @@ from flask import Flask, jsonify, request
 from flask_cors import CORS
 import pandas as pd
 import stats as st
+from stats import filtrar_serie, es_porcentaje, validar_valor
 
 app = Flask(__name__)
 CORS(app)
@@ -45,9 +46,13 @@ def get_datos():
         result = result[cols]
         result = result.rename(columns={concepto: 'valor'})
         result['concepto'] = concepto
+        result = result[result['valor'].apply(lambda v: validar_valor(v, concepto))]
     else:
         result = result.melt(id_vars=['departamento', 'anio', 'sexo'],
                              var_name='concepto', value_name='valor')
+        for c in result['concepto'].unique():
+            mask_c = result['concepto'] == c
+            result = result[~mask_c | result['valor'].apply(lambda v: validar_valor(v, c))]
 
     result = result.dropna(subset=['valor'])
     return jsonify(result.to_dict(orient='records'))
@@ -64,10 +69,10 @@ def get_estadisticos():
     if filtered.empty or concepto not in filtered.columns:
         return jsonify({'error': 'No data'}), 404
 
-    series = filtered[concepto]
-    stats = st.calcular_estadisticos(series)
+    series = filtrar_serie(filtered[concepto], concepto)
+    stats = st.calcular_estadisticos(series, concepto)
     outliers = st.detectar_outliers(series)
-    dist = st.distribucion_normal(series)
+    dist = st.distribucion_normal(series, concepto=concepto)
     interp = st.interpretar(series, concepto)
 
     return jsonify({
@@ -110,6 +115,7 @@ def get_mapa():
     concepto = request.args.get('concepto', 'Tasa de Desocupacion (TD)')
     mask = (df['anio'] == int(anio)) & (df['sexo'] == sexo)
     data = df[mask][['departamento', concepto]].dropna()
+    data = data[data[concepto].apply(lambda v: validar_valor(v, concepto))]
     data = data.rename(columns={concepto: 'valor'})
     return jsonify(data.to_dict(orient='records'))
 
@@ -123,6 +129,7 @@ def get_interpretacion():
     filtered = st.get_filtered_data(df, departamento=depto, sexo=sexo, anio=anio)
     if filtered.empty or concepto not in filtered.columns:
         return jsonify({'interpretacion': 'No hay datos.'})
+    filtered[concepto] = filtrar_serie(filtered[concepto], concepto)
     labels = filtered['departamento'].tolist() if 'departamento' in filtered.columns else None
     interp = st.interpretar(filtered[concepto], concepto, labels)
     result = interp
@@ -153,17 +160,15 @@ def get_distribucion_sexo():
     for sexo_val in ['hombres', 'mujeres']:
         sexo_mask = filtered['sexo'] == sexo_val
         if sexo_mask.any():
-            valor_medio = filtered[sexo_mask][concepto].mean()
+            serie = filtrar_serie(filtered[sexo_mask][concepto], concepto)
+            valor_medio = serie.mean() if len(serie) > 0 else 0
             sexo_valores[sexo_val] = float(valor_medio) if pd.notna(valor_medio) else 0
     
-    # Calcular porcentaje (proporción del total)
     total = sum(sexo_valores.values())
-    sexo_dist = {}
     if total > 0:
-        for sexo, valor in sexo_valores.items():
-            sexo_dist[sexo] = round((valor / total) * 100, 2)
+        sexo_dist = {s: round((v / total) * 100, 2) for s, v in sexo_valores.items()}
     else:
-        sexo_dist = {sexo: 0 for sexo in sexo_valores.keys()}
+        sexo_dist = {s: 0 for s in sexo_valores}
     
     return jsonify({'distribucion_sexo': sexo_dist})
 

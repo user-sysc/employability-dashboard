@@ -16,7 +16,7 @@ function initMap() {
   }).addTo(map);
 
   geoLayer = L.geoJSON(COLOMBIA_DEPARTMENTS, {
-    style: { color: '#fff', weight: 1, fillOpacity: 0.7, fillColor: '#bdc3c7' },
+    style: { color: '#2c3e50', weight: 1.6, fillOpacity: 0.75, fillColor: '#bdc3c7' },
     onEachFeature: (feature, layer) => {
       const name = feature.properties.NOMBRE_DPT;
       layer.bindTooltip(name, { sticky: true });
@@ -24,10 +24,15 @@ function initMap() {
         document.getElementById('filter-depto').value = name;
         document.getElementById('filter-depto').dispatchEvent(new Event('change'));
       });
-      layer.on('mouseover', () => layer.setStyle({ weight: 2.5, color: '#2c3e50' }));
+      layer.on('mouseover', () => {
+        layer.setStyle({ weight: 3, color: '#111827' });
+        if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
+          layer.bringToFront();
+        }
+      });
       layer.on('mouseout', () => {
         if (name !== document.getElementById('filter-depto').value) {
-          layer.setStyle({ weight: 1, color: '#fff' });
+          layer.setStyle({ weight: 1.6, color: '#2c3e50' });
         }
       });
     }
@@ -65,9 +70,9 @@ function updateMap(data, concepto, selectedDepto) {
       const color = getColor(match.valor, minVal, maxVal);
       layer.setStyle({
         fillColor: isOthers ? '#e8e8e8' : color,
-        fillOpacity: isSelected ? 0.95 : isOthers ? 0.25 : 0.8,
-        color: isSelected ? '#2c3e50' : isOthers ? '#ddd' : '#fff',
-        weight: isSelected ? 2.5 : 1,
+        fillOpacity: isSelected ? 0.9 : isOthers ? 0.2 : 0.75,
+        color: isSelected ? '#111827' : isOthers ? '#cbd5e1' : '#2c3e50',
+        weight: isSelected ? 2.8 : 1.6,
       });
       layer.bindTooltip(
         `<b>${name}</b><br>${match.valor.toFixed(2)}%<br><small>${concepto}</small>`,

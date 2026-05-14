@@ -22,6 +22,8 @@ cd project-empleabilidad
 
 ### 2. Crear entorno virtual Python
 
+**Opción A — Con venv:**
+
 ```bash
 python -m venv .venv
 ```
@@ -29,38 +31,33 @@ python -m venv .venv
 **Activar entorno virtual:**
 
 - **Windows:**
-
-```bash
-.venv\Scripts\activate
-```
-
+  ```bash
+  .venv\Scripts\activate
+  ```
 - **macOS/Linux:**
+  ```bash
+  source .venv/bin/activate
+  ```
+
+**Opción B — Con Pipenv:**
 
 ```bash
-source .venv/bin/activate
+pip install pipenv
+pipenv install
+pipenv shell
 ```
+
+Pipenv crea y activa el entorno automáticamente. Las dependencias se instalan desde el `Pipfile`.
 
 ### 3. Instalar dependencias
+
+Con **venv** (entorno ya activado):
 
 ```bash
 cd backend
 pip install -r requirements.txt
 cd ..
 ```
-
-### 4. Ubicar archivo fuente GEIH
-
-Colocar el archivo `anex-GEIHDepartamentos-2025.xls` en la carpeta `etl/`:
-
-```
-project-empleabilidad/etl/anex-GEIHDepartamentos-2025.xls
-```
-
-**Obtener el archivo:**
-
-- Descargar desde DANE (Departamento Administrativo Nacional de Estadística)
-- Dataset: Gran Encuesta Integrada de Hogares (GEIH)
-- Acceso: https://www.dane.gov.co
 
 ### 5. Procesar datos (generar CSV)
 
@@ -70,9 +67,7 @@ python etl.py
 cd ..
 ```
 
-**Tiempo:** ~15-30 segundos
-
-**Verificar:** Se genera `data/empleabilidad_full.csv` (1,380 filas)
+**Verificar:** Se genera `data/empleabilidad_full.csv`
 
 ### 6. Iniciar servidor backend Flask
 
@@ -99,6 +94,8 @@ file:///ruta/absoluta/project-empleabilidad/frontend/index.html
 ```
 
 O simplemente navega a la carpeta `frontend/` y abre `index.html` con doble clic.
+
+**Alternativa (VS Code):** instala la extensión **Live Server**, haz clic derecho sobre `frontend/index.html` y selecciona _"Open with Live Server"_.
 
 ---
 
@@ -150,29 +147,22 @@ project-empleabilidad/
 ├── backend/                    # API Flask (Python)
 │   ├── app.py                  # Servidor con 10 endpoints
 │   ├── stats.py                # Cálculos estadísticos
-│   └── requirements.txt         # Dependencias
+│   └── requirements.txt        # Dependencias
 ├── frontend/                   # Aplicación web
 │   ├── index.html              # Página principal
-│   ├── css/style.css           # Estilos
-│   └── js/                     # JavaScript (4 archivos)
+│   ├── css/
+│   │   └── style.css           # Estilos
+│   └── js/
+│       ├── app.js              # Lógica principal
+│       ├── chart.js            # Gráficos
+│       ├── colombia-geo.js     # Datos geográficos
+│       ├── map.js              # Mapa interactivo
+│       └── stats.js            # Estadísticas
 ├── etl/                        # Procesamiento de datos
 │   ├── etl.py                  # Script de transformación
 │   └── anex-GEIHDepartamentos-2025.xls  # Fuente DANE
 ├── data/                       # Datos procesados
 │   └── empleabilidad_full.csv  # Dataset principal
-└── docs/                       # Documentación
-    └── informe.md              # Informe académico
+├── README.md
+└── rubrica.md                  # Rúbrica de evaluación
 ```
-
----
-
-## Notas Importantes
-
-- El archivo Excel fuente (GEIH) **no está incluido en el repositorio** por su tamaño (1.2 MB)
-- Debes ejecutar `python etl.py` una sola vez para generar el CSV
-- El backend Flask debe estar corriendo en el puerto 5000 mientras usas la aplicación
-- La aplicación requiere conexión a internet para cargar mapas (OpenStreetMap)
-
----
-
-¿Problemas? Revisa la consola del navegador (F12) o el terminal donde ejecutas Flask.

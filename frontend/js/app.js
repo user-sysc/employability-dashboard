@@ -312,7 +312,8 @@ function updateDistChart(statsData) {
     d.labels, d.observado, d.esperado,
     d.curva_x, d.curva_y,
     d.media || 0, d.std || 0,
-    state.concepto
+    state.concepto,
+    d.tipo
   );
 }
 
@@ -322,7 +323,7 @@ function updatePieChart(sexoData) {
   const labels = Object.keys(dist).map(s => s === 'hombres' ? 'Hombres' : 'Mujeres');
   const values = Object.values(dist);
   if (labels.length === 0 || values.length === 0) return;
-  createPieChart(document.getElementById('chart-pie'), labels, values);
+  createPieChart(document.getElementById('chart-pie'), labels, values, 'Distribucion por sexo (%)');
 }
 
 function setupEventListeners() {
